@@ -47,8 +47,8 @@ RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && nvm alias default v${NODE_VERSION
 #install ruby version RUBY_VERSION
 RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && rvm install $RUBY_VERSION --default"
 
-# #Install ruby gems such as bundler and pry
-RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install pry && gem list | wc -l"
+# #Install ruby gems such as bundler, rspec and pry
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install rspec && gem install pry && gem list | wc -l"
 
 #enable .bashrc when user moringastudent logs into bash shell
 RUN echo "[ -s /home/${user}/.rvm/scripts/rvm ] && source /home/${user}/.rvm/scripts/rvm" >> /home/${user}/.bashrc
