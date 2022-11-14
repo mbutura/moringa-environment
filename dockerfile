@@ -66,9 +66,3 @@ RUN git config --global color.ui true \
  && git config --global user.name "$GH_NAME" \
  && git config --global user.email "$GH_EMAIL" \
  && git config --global init.defaultBranch main
-
-#Create directory .ssh and preceding parent directories'
-RUN mkdir -p /home/moringastudent/.ssh
-
-#Disable stricthostchecking in ssh config as the ssh key owner will not match with the docker host
-RUN echo "Host *\n\tStrictHostKeyChecking no\n" >> /home/moringastudent/.ssh/config
