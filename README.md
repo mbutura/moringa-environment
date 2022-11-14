@@ -12,7 +12,7 @@ The tools assume that the host system is ubuntu or debian based. Docker should a
 
 To install docker using apt:
 
-`sudo apt install docker`
+`sudo snap install docker`
 
 After docker has completed successfully run:
 
@@ -20,7 +20,3 @@ After docker has completed successfully run:
 
 Building the image may take substantial time the first time the command is run, however use of docker build caches will ensure
 instanteneous  runtimes subsequently.
-
-## TODO
-
-Change user from 'root' to lower priviledged user 'moringastudent'

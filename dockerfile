@@ -3,54 +3,63 @@ FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 #User defined variables
-ENV NODE_VERSION=16.13.0
-ENV RUBY_VERSION=2.7.4
-ENV GH_NAME = 'Alois Mbutura'
-ENV GH_EMAIL = 'alois.mbutura@student.moringaschool.com'
+ARG NODE_VERSION='16.13.0'
+ARG RUBY_VERSION='2.7.4'
+ARG GH_NAME='Alois Mbutura'
+ARG GH_EMAIL='alois.mbutura@student.moringaschool.com'
+
+ENV user 'moringastudent'
+ENV RVM_DIR /home/${user}/.rvm
+ENV NVM_DIR /home/${user}/.nvm
+
+#Update package list and install sudo
+RUN apt-get update && apt-get -y install sudo
+
+#Create user moringastudent and enable use of /bin/bash which can source
+#the rvm scripts
+RUN useradd -m -d /home/${user} -s /bin/bash ${user} && \
+    chown -R ${user} /home/${user} && \
+    adduser ${user} sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+USER ${user}
+WORKDIR /home/${user}
 
 #Install prerequisites to node and ruby installation such as curl and other apt commands
-RUN apt-get update && apt-get install -y \
+RUN sudo apt-get update && sudo apt-get install -y \
     apt-utils \
     curl \
     software-properties-common
 
-# Add rael-gc/rvm ppa to apt-list and perform non-interactive install    
-RUN apt-add-repository -y ppa:rael-gc/rvm && apt-get install -y rvm
+# Get rvm install script from github and pipe to bash interpreter binary for execution. Change install 
+# path to non-priviledged folder in user's home diretory 
+RUN curl -sSL https://get.rvm.io | bash -s -- --path ${RVM_DIR}
 
 # Get nvm install script from github and pipe to bash interpreter binary for execution
 RUN curl -o- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
-#Set NVM to ${HOME}/.nvm . In docker $HOME defaults to /root
-ENV NVM_DIR=/root/.nvm
-
 #Install nodejs NODE_VERSION using nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-
+RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && nvm install ${NODE_VERSION}"
 
 #Set nvm alias default to nodejs NODE_VERSION
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-
-#Add rvm npm rvm to PATH
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:$GEM_HOME/bin:/usr/share/rvm/bin:${PATH}"
+RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && nvm alias default v${NODE_VERSION}"
 
 #install ruby version RUBY_VERSION
-RUN rvm install $RUBY_VERSION --default
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && rvm install $RUBY_VERSION --default"
 
-#Install ruby gems such as bundler and pry
-RUN rvm all do gem update --system && rvm all do gem install bundler && rvm all do gem install pry && rvm all do gem list | wc -l
+# #Install ruby gems such as bundler and pry
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install pry && gem list | wc -l"
 
-#Add bash startup instructions so as to be able to call ruby scripts without rvm all do X because the scripts disallow sourcing into sh shells.
-#Docker natively uses sh shells hence the need to do rvm all do X(gem, ruby)
-RUN echo "PATH=$GEM_HOME/bin:/usr/share/rvm/bin:$PATH" >> $HOME/.bashrc
-RUN echo "[ -s /usr/share/rvm/scripts/rvm ] && source /usr/share/rvm/scripts/rvm" >> $HOME/.bashrc
+#enable .bashrc when user moringastudent logs into bash shell
+RUN echo "[ -s /home/${user}/.rvm/scripts/rvm ] && source /home/${user}/.rvm/scripts/rvm" >> /home/${user}/.bashrc
 
 # Add git ppa to apt-list and install latest
-RUN add-apt-repository ppa:git-core/ppa && apt update && apt install -y git
+RUN sudo add-apt-repository ppa:git-core/ppa && sudo apt update && sudo apt install -y git
 
 #Confirm node, npm and ruby versions installed
-RUN node --version
-RUN npm --version
-RUN rvm all do ruby --version
+RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && node --version"
+RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && npm --version"
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && ruby --version"
 RUN git --version
 
 RUN git config --global color.ui true \
@@ -58,20 +67,8 @@ RUN git config --global color.ui true \
  && git config --global user.email "$GH_EMAIL" \
  && git config --global init.defaultBranch main
 
-#Add user 'user'
-RUN useradd -m moringastudent
-
 #Create directory .ssh and preceding parent directories'
-#RUN mkdir -p /home/moringastudent/.ssh
-RUN mkdir -p /root/.ssh
-
-#Set ownership of the ssh folder from root to moringastudent
-#RUN chown -R moringastudent:moringastudent /home/moringastudent/.ssh
+RUN mkdir -p /home/moringastudent/.ssh
 
 #Disable stricthostchecking in ssh config as the ssh key owner will not match with the docker host
-#RUN echo "Host *.trabe.io\n\tStrictHostKeyChecking no\n" >> /home/moringastudent/.ssh/config
-RUN echo "Host *.trabe.io\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
-
-#Change user to moringastudent
-#USER moringastudent
-
+RUN echo "Host *\n\tStrictHostKeyChecking no\n" >> /home/moringastudent/.ssh/config
