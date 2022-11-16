@@ -14,11 +14,13 @@ To install docker using apt:
 
 `sudo snap install docker`
 
-After docker has completed successfully run:
+After docker has completed successfully and you are using an ECDSA based SSH key, run:
 
-`DOCKER_BUILDKIT=1 docker build --build-arg ssh_prv_key="$(cat ~/.ssh/id_ed25519)" --build-arg ssh_pub_key="$(cat ~/.ssh/id_ed25519.pub)" -t moringa-environment moringa-environment/ && docker run  -it --rm moringa-environment`
+`bash setup-env ed25519`
 
-where id_ed25519 is the ECDSA based key.
+Otherwise if using an rsa key run:
+
+`bash setup-env rsa`
 
 Building the image may take substantial time the first time the command is run, however use of docker build caches will ensure
 instanteneous  runtimes subsequently.
