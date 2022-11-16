@@ -7,13 +7,15 @@ ARG NODE_VERSION='16.13.0'
 ARG RUBY_VERSION='2.7.4'
 ARG GH_NAME='Alois Mbutura'
 ARG GH_EMAIL='alois.mbutura@student.moringaschool.com'
+ARG ssh_prv_key
+ARG ssh_pub_key
 
 ENV user 'moringastudent'
 ENV RVM_DIR /home/${user}/.rvm
 ENV NVM_DIR /home/${user}/.nvm
 
 #Update package list and install sudo
-RUN apt-get update && apt-get -y install sudo
+RUN apt-get update && apt-get -y install sudo ssh
 
 #Create user moringastudent and enable use of /bin/bash which can source
 #the rvm scripts
@@ -24,6 +26,17 @@ RUN useradd -m -d /home/${user} -s /bin/bash ${user} && \
 
 USER ${user}
 WORKDIR /home/${user}
+
+# Authorize SSH Host
+RUN mkdir -p /home/${user}/.ssh && \
+    chmod 0700 /home/${user}/.ssh && \
+    ssh-keyscan github.com > /home/${user}/.ssh/known_hosts
+
+# Add the keys and set permissions
+RUN echo "$ssh_prv_key" > /home/${user}/.ssh/id_rsa && \
+    echo "$ssh_pub_key" > /home/${user}/.ssh/id_rsa.pub && \
+    chmod 600 /home/${user}/.ssh/id_rsa && \
+    chmod 600 /home/${user}/.ssh/id_rsa.pub
 
 #Install prerequisites to node and ruby installation such as curl and other apt commands
 RUN sudo apt-get update && sudo apt-get install -y \
@@ -47,8 +60,8 @@ RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && nvm alias default v${NODE_VERSION
 #install ruby version RUBY_VERSION
 RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && rvm install $RUBY_VERSION --default"
 
-# #Install ruby gems such as bundler, rspec and pry
-RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install rspec && gem install pry && gem list | wc -l"
+# #Install ruby gems such as bundler, rspec rspand pry
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install pry && gem list | wc -l"
 
 #enable .bashrc when user moringastudent logs into bash shell
 RUN echo "[ -s /home/${user}/.rvm/scripts/rvm ] && source /home/${user}/.rvm/scripts/rvm" >> /home/${user}/.bashrc

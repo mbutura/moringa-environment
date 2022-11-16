@@ -16,7 +16,9 @@ To install docker using apt:
 
 After docker has completed successfully run:
 
-`DOCKER_BUILDKIT=1 docker build -t moringa-environment . && docker run -it --rm -v ~/.ssh:/root/.ssh:ro moringa-environment`
+`DOCKER_BUILDKIT=1 docker build --build-arg ssh_prv_key="$(cat ~/.ssh/id_ed25519)" --build-arg ssh_pub_key="$(cat ~/.ssh/id_ed25519.pub)" -t moringa-environment moringa-environment/ && docker run  -it --rm moringa-environment`
+
+where id_ed25519 is the ECDSA based key.
 
 Building the image may take substantial time the first time the command is run, however use of docker build caches will ensure
 instanteneous  runtimes subsequently.
