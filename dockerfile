@@ -79,3 +79,8 @@ RUN git config --global color.ui true \
  && git config --global user.name "$GH_NAME" \
  && git config --global user.email "$GH_EMAIL" \
  && git config --global init.defaultBranch main
+
+#Install node http-server to serve requests from docker image created from this file
+RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && npm install --global http-server"
+
+EXPOSE 5050
