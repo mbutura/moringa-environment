@@ -83,4 +83,8 @@ RUN git config --global color.ui true \
 #Install node http-server to serve requests from docker image created from this file
 RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && npm install --global http-server"
 
+#App test port
 EXPOSE 5050
+
+#json.db port
+EXPOSE 3000
