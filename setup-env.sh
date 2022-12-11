@@ -7,4 +7,4 @@ SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
 
 printf "Setting up moringa environment using %s-based SSH keys\n" "$1"
 
-docker build --build-arg ssh_prv_key="$(cat ~/.ssh/id_$1)" --build-arg ssh_pub_key="$(cat ~/.ssh/id_$1.pub)" -t moringa-environment $SCRIPT_DIR && docker run -p 0.0.0.0:5050:5050 -p -p 0.0.0.0:3000:3000 -it --rm moringa-environment
+docker build --build-arg ssh_prv_key="$(cat ~/.ssh/id_$1)" --build-arg ssh_pub_key="$(cat ~/.ssh/id_$1.pub)" -t moringa-environment $SCRIPT_DIR && docker run -p 5050:5050 -p 3000:3000 -it --rm moringa-environment
