@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu-20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -61,7 +61,7 @@ RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && nvm alias default v${NODE_VERSION
 RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && rvm install $RUBY_VERSION --default"
 
 # #Install ruby gems such as bundler, rspec rspand pry
-RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install pry && gem list | wc -l"
+RUN /bin/bash -l -c "source /home/${user}/.rvm/scripts/rvm && gem update --system && gem install bundler && gem install pry & gem install rspec && gem list | wc -l"
 
 #enable .bashrc when user moringastudent logs into bash shell
 RUN echo "[ -s /home/${user}/.rvm/scripts/rvm ] && source /home/${user}/.rvm/scripts/rvm" >> /home/${user}/.bashrc
@@ -84,4 +84,4 @@ RUN git config --global color.ui true \
 RUN /bin/bash -l -c "source $NVM_DIR/nvm.sh && npm install --global http-server json-server"
 
 #App test and json.db port
-EXPOSE 5050 3000
+EXPOSE 5050 3000 5173 4173 
